@@ -27,17 +27,23 @@ class BukuController extends Controller
     }
     public function showBuku(){
         $buku = Buku::all();
-        return view('admin-view-buku', compact('buku'));
+        return view('admin-view-buku', ['buku' => $buku]);
     }
     public function showBukuDashboard(){
         $buku = Buku::where('dipinjam',0)->get();
-        return view('dashboard-buku', compact('buku'));
+        return view('dashboard-buku', ['buku' => $buku]);
     }
     public function showSpecificBuku($id){
-        $buku = Buku::find($id)->get();
+        $buku = Buku::find($id);
         //Bisa pakai view admin atau user
         //Au ah
-        return view('dashboard-buku-specific',compact('buku'));
+        return view('dashboard-buku-specific',['buku' => $buku]);
+    }
+    public function showSpecificBukuAdmin($id){
+        $buku = Buku::find($id);
+        //Bisa pakai view admin atau user
+        //Au ah
+        return view('admin-view-buku-specific',['buku' => $buku]);
     }
     public function updateBuku(Request $request, $id){
         $validatedData = $request->validate([
@@ -58,11 +64,12 @@ class BukuController extends Controller
             'dipinjam' => $validatedData['dipinjam'],
         ]);
 
-        return redirect()->route('specific-buku',['id' => $id]);
+        return redirect()->route('admin-specific-book',['id' => $id]);
     }
     public function deleteBuku($id){
         $buku = Buku::find($id);
         $buku->delete();
+        return redirect()->route('admin-buku');
     }
 
     public function showCreateBuku(){
@@ -70,10 +77,10 @@ class BukuController extends Controller
     }
     public function showUpdateBuku($id){
         $buku = Buku::find($id);
-        return view('admin-update-buku',compact('buku'));
+        return view('admin-update-buku',['buku' => $buku]);
     }
     public function showDeleteBuku($id){
         $buku = Buku::find($id);
-        return view('admin-delete-buku',compact('buku'));
+        return view('admin-delete-buku',['buku' => $buku]);
     }
 }

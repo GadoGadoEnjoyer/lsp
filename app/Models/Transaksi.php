@@ -13,10 +13,11 @@ class Transaksi extends Model
 
     public function buku(): BelongsTo
     {
-        return $this->belongsTo(Buku::class);
+        return $this->belongsTo(Buku::class, 'buku', 'id'); 
     }
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'siswa', 'id');
     }
+    public $timestamps = false;
 }

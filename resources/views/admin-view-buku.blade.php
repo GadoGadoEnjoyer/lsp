@@ -1,3 +1,47 @@
-<div>
-    <!-- Breathing in, I calm body and mind. Breathing out, I smile. - Thich Nhat Hanh -->
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku List</title>
+    <style>
+         html,body{
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: rgb(50, 50, 46);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color:white;
+        }
+        div{
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            flex-direction: column;
+            background-color: rgb(50, 50, 46);
+            height: 25%;
+            width: 75%;
+            min-width: fit-content;
+        }
+    </style>
+</head>
+<body>
+    <form action="/admin/buat/buku" method="get">
+        <input type="submit" value="Buat Buku">
+    </form>
+    <div>
+        @foreach($buku as $buck)
+            {{$buck->judul}} oleh {{$buck->pengarang}}<br>
+            <form action="/admin/buku/{{$buck->id}}" method="get">
+                <input type="submit" value="view detail">
+            </form>
+
+        @endforeach
+    </div>
+
+</body>
+</html>

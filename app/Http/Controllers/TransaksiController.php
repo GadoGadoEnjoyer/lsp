@@ -8,6 +8,7 @@ use App\Models\Buku;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class TransaksiController extends Controller
 {
@@ -31,14 +32,14 @@ class TransaksiController extends Controller
         return redirect()->route('admin-transaksi');
     }
     public function showTransaksi(){
-        $transaksi = Transaksi::all();
-        return view('admin-view-transaksi', compact('transaksi'));
+        $transaksi = Transaksi::with('buku','user')->get();
+        return view('admin-view-transaksi', ['transaksi' => $transaksi]);
     }
     public function showSpecificTransaksi($id){
         $transaksi = Transaksi::find($id);
         $buku = $transaksi->buku;
         $siswa = $transaksi->siswa;
-        return view('admin-view-transaksi-specific', compact('transaksi','buku','siswa'));
+        return view('admin-view-transaksi-specific', ['transaksi' => $transaksi, 'buku' => $buku, 'siswa' => $siswa]);
     }
     public function updateTransaksi(Request $request,$id){
         $validatedData = $request->validate([
@@ -54,12 +55,13 @@ class TransaksiController extends Controller
             'pinjam' => $validatedData['pinjam'],
             'kembali' => $validatedData['kembali'],
         ]);
-        return redirect()->route('specific-transaksi',['id' => $id]);
+        return redirect()->route('admin-transaksi');
     }
     public function deleteTransaksi($id){
         $transaksi = Transaksi::find($id);
         $transaksi->delete();
-        return view('admin-delete-transaksi',compact('transaksi'));
+        return view('admin-delete-transaksi',['transaksi' => $transaksi]);
+        return redirect()->route('admin-transaksi');
     }
 
     
@@ -70,32 +72,31 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::find($id);
         $buku = $transaksi->buku;
         $siswa = $transaksi->siswa;
-        return view('admin-update-transaksi', compact('transaksi','buku','siswa'));
+        return view('admin-update-transaksi', ['transaksi' => $transaksi, 'buku' => $buku, 'siswa' => $siswa]);
     }
     public function showDeleteTransaksi($id){
         $transaksi = Transaksi::find($id);
-        return view('admin-delete-transaksi', compact('transaksi'));
+        return view('admin-delete-transaksi', ['transaksi' => $transaksi]);
     }
 
 
     //Now for the user
 
-    public function borrowBook(Request $request, $id){
-        $validatedData = $request->validate([
-            'pinjam' => 'required',
-        ]);
-        $buku = Buku::find($id)->get();
+    public function borrowBook($id){
+        $buku = Buku::find($id);
         Transaksi::create([
             'buku' => $id,
             'siswa' => Auth::id(),
-            'pinjam' => $validatedData['pinjam'],
+            'pinjam' => Carbon::now(),
         ]);
         $buku->dipinjam = 1;
+        $buku->save();
         return redirect()->route('dashboard-buku');
     }
     public function returnBook($id){
         $transaksi = Transaksi::find($id);
         $user = $transaksi->user;
+        Log::info($user);
         if($user->id == Auth::id()){
             $transaksi = Transaksi::find($id);
             $transaksi->update([
@@ -103,6 +104,8 @@ class TransaksiController extends Controller
             ]);
             $buku = Buku::find($transaksi->buku);
             $buku->dipinjam = 0;
+            $buku->save();
+            return redirect()->route('dashboard-buku');
         }
         else{
             return redirect()->route('login');
@@ -111,15 +114,15 @@ class TransaksiController extends Controller
 
     //Which are unreturned btw
     public function showBorrowedBook(){
-        $transaksi = Transaksi::where('kembali', null)->where('siswa',Auth::id());
-        return view('dashboard-kembali-buku', compact('transaksi'));
+        $transaksi = Transaksi::with('buku')->where('kembali', null)->where('siswa',Auth::id())->get();
+        return view('dashboard-kembali-buku', ['transaksi' => $transaksi]);
     }
     public function showSpecificBorrowedBook($id){
         $transaksi = Transaksi::find($id);
-        return view('dashboard-kembali-buku-specific', compact('transaksi'));
+        return view('dashboard-kembali-buku-specific', ['transaksi' => $transaksi]);
     }
     public function showBorrowBook($id){
         $buku = Buku::find($id);
-        return view('dashboard-pinjam-buku', compact('buku'));
+        return view('dashboard-pinjam-buku', ['buku' => $buku]);
     }
 }

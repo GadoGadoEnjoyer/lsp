@@ -24,6 +24,7 @@ class UserController extends Controller
             'jurusan' => $validatedData['jurusan'],
             'username' => $validatedData['username'],
             'password' => bcrypt($validatedData['password']),
+            'admin' => 0,
         ]);
         return redirect()->route('login');
     }
@@ -64,6 +65,7 @@ class UserController extends Controller
             'jurusan' => 'required',
             'username' => 'required',
             'password' => 'required',
+            'admin' => 'required'
         ]);
         User::create([
             'nis' => $validatedData['nis'],
@@ -72,16 +74,17 @@ class UserController extends Controller
             'jurusan' => $validatedData['jurusan'],
             'username' => $validatedData['username'],
             'password' => bcrypt($validatedData['password']),
+            'admin' => $validatedData['admin']
         ]);
         return redirect()->route('admin-siswa');
     }
     public function showSiswa(){
         $siswa = User::all();
-        return view('admin-view-user',compact($siswa));
+        return view('admin-view-user',['siswa' => $siswa]);
     }
     public function showSpecificSiswa($id){
-        $siswa = User::find($id)->get();
-        return view('admin-view-user-specific',compact($siswa));
+        $siswa = User::find($id);
+        return view('admin-view-user-specific',["siswa" => $siswa]);
     }
     //Yes, the admin can see the users password
     //This is not a good idea in irl app ngl
@@ -93,6 +96,7 @@ class UserController extends Controller
             'jurusan' => 'required',
             'username' => 'required',
             'password' => 'required', 
+            'admin' => 'required'
         ]);
         $siswa = User::where('id',$id);
         $siswa->update([
@@ -102,8 +106,9 @@ class UserController extends Controller
             'jurusan' => $validatedData['jurusan'],
             'username' => $validatedData['username'],
             'password' => bcrypt($validatedData['password']),
+            'admin' => $validatedData['admin']
         ]);
-        return redirect()->route('siswa-specific',['id' => $id]);
+        return redirect()->route('admin-siswa');
     }
     public function deleteSiswa($id){
         $siswa = User::find($id);
@@ -115,12 +120,12 @@ class UserController extends Controller
         return view("admin-create-user");
     }
     public function showUpdateSiswa($id){
-        $siswa = User::find($id)->get();
-        return view("admin-update-user",compact($siswa));
+        $siswa = User::find($id);
+        return view("admin-update-user",['siswa' => $siswa]);
     }
     public function showDeleteSiswa($id){
-        $siswa = User::find($id)->get();
-        return view("admin-delete-user",compact($siswa));
+        $siswa = User::find($id);
+        return view("admin-delete-user",['siswa' => $siswa]);
     }
 
 
